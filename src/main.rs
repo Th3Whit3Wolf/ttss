@@ -12,8 +12,9 @@ use actix_web::client::Client;
 use actix_web::{error as AnotherError, http, middleware, web, App, Error as ActixError, HttpResponse, HttpServer};
 use clap::{value_t, Arg};
 use rand::Rng;
-use sitemap::reader::{SiteMapEntity, SiteMapReader};
-use tantivy;
+use sitemap::{structs::Location, reader::{SiteMapEntity, SiteMapReader}};
+use once_cell::sync::OnceCell;
+
 use tantivy::{
     collector::{Count, TopDocs},
     query::QueryParser,
@@ -29,44 +30,32 @@ async fn index(
     query: web::Query<HashMap<String, String>>,
     tantivy_index: web::Data<PathBuf>
 ) -> Result<HttpResponse, ActixError> {
+    let mut ctx = tera::Context::new();
     let s = if let Some(query) = query.get("q") {
         // submitted form
         let pages = get_search_results(&query, tantivy_index);
         if pages.is_empty() {
-            let mut ctx = tera::Context::new();
             ctx.insert("query", &query);
             tmpl.render("noresults.html", &ctx)
-                .map_err(|_| AnotherError::ErrorInternalServerError("Template error"))?
+                .map_err(|_| AnotherError::ErrorInternalServerError("Template error for noresults"))?
         } else {
-            let mut ctx = tera::Context::new();
             ctx.insert("query", &query);
             ctx.insert("pages", &pages);
             tmpl.render("search.html", &ctx)
-                .map_err(|_| AnotherError::ErrorInternalServerError("Template error"))?
+                .map_err(|_| AnotherError::ErrorInternalServerError("Template error for search"))?
         }
     } else {
-        let ctx = tera::Context::new();
         tmpl.render("index.html", &ctx)
-            .map_err(|_| AnotherError::ErrorInternalServerError("Template error"))?
+            .map_err(|_| AnotherError::ErrorInternalServerError("Template error for index"))?
     };
     Ok(HttpResponse::Ok().content_type("text/html").body(s))
 }
 
-async fn random(sitemap: web::Data<String>) -> HttpResponse {
-    let mut urls = Vec::with_capacity(40);
-    for entity in SiteMapReader::new(File::open(Path::new(&sitemap.get_ref())).unwrap()) {
-        match entity {
-            SiteMapEntity::Url(url_entry) => {
-                urls.push(url_entry.loc);
-            }
-            _ => {}
-        }
-    }
-
+async fn random(site_map: web::Data<Vec<Location>>) -> HttpResponse {
     HttpResponse::Found()
         .header(
             http::header::LOCATION,
-            urls[rand::thread_rng().gen_range(0, urls.len())].get_url().unwrap().as_str(),
+            site_map[rand::thread_rng().gen_range(0, site_map.len())].get_url().unwrap().as_str(),
         )
         .finish()
         .into_body()
@@ -119,14 +108,26 @@ async fn main() -> std::io::Result<()> {
     let tera_templates = value_t!(matches, "tera_templates", PathBuf).unwrap_or_else(|e| e.exit());
     let tera = Tera::new(&(tera_templates.as_os_str().to_str().unwrap().to_string() + "/**/*")).unwrap();
     let tantivy_index = value_t!(matches, "tantivy_index", PathBuf).unwrap_or_else(|e| e.exit());
-    let sitemap = value_t!(matches, "sitemap", String).unwrap_or_else(|e| e.exit());
+    //let sitemap = value_t!(matches, "sitemap", String).unwrap_or_else(|e| e.exit());
+
+    static SITEMAP: OnceCell<Vec<Location>> = OnceCell::new();
+    SITEMAP.get_or_init(|| {
+        let sitemap = value_t!(matches, "sitemap", String).unwrap_or_else(|e| e.exit());
+        let mut urls = Vec::new();
+        for entity in SiteMapReader::new(File::open(Path::new(&sitemap)).unwrap()) {
+            if let SiteMapEntity::Url(url_entry) = entity {
+                urls.push(url_entry.loc);
+            }
+        }
+        urls
+    });
 
     HttpServer::new(move || {
         App::new()
             .data(Client::new())
             .data(tera.clone())
             .data(tantivy_index.clone())
-            .data(sitemap.clone())
+            .data(SITEMAP.clone())
             .wrap(middleware::Logger::default())
             .service(web::resource("/").route(web::get().to(index)))
             .service(web::resource("/rando").route(web::get().to(random)))
@@ -152,7 +153,7 @@ fn get_search_results(query: &str, tantivy_index: web::Data<PathBuf>) -> Vec<Pag
         let title_val = doc.get_first(title_field).unwrap().clone();
         let desc_val = doc.get_first(desc_field).unwrap().clone();
         let link_val = doc.get_first(link_field).unwrap().clone();
-        let date_val = doc.get_first(date_field).clone();
+        let date_val = doc.get_first(date_field);
 
         let title = match title_val {
             Value::Str(x) => Some(x),
