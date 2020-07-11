@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html class="has-nb-fixed-top" lang="en">
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <title>Search | MagniLinux</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+        <link rel="stylesheet" href="https://wiki.magnilinux.org/css/main.min.css">
+        <link rel="stylesheet" href="https://wiki.magnilinux.org/css/print.min.css" media="print"> 
+    </head>
+
+    <body>
+        <nav class="nb is-fixed-top" role="navigation" aria-label="main navigation">
+            <div class="nb-brand">
+                <a class="nb-item" href="https://magnilinux.org">
+                    <font color="#ffffff">magni</font>
+                    <font color="#7851a9">linux</font>
+                </a>
+                <a role="button" class="nb-burger" data-target="navMenu" aria-label="menu" aria-expanded="false">
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span></a>
+            </div>
+            <div id="navMenu" class="nb-menu">
+                <div class="nb-end">
+                    <a class="nb-item" href="https://magnilinux.org">Home</a>
+                    <a class="nb-item" href="https://pkg.magnilinux.org">Packages</a>
+                    <a class="nb-item" href="https://forum.magnilinux.org">Forum</a>
+                    <a class="nb-item is-active" href="https://wiki.magnilinux.org">Wiki</a>
+                    <a class="nb-item" href="https://our.magnilinux.org">OUR</a>
+                    <a class="nb-item" href="https://magnilinux.org/downloads">Downloads</a>
+                </div>
+            </div>
+        </nav>
+        <section class="side-menu cols is-fullheight">
+            <aside id="sideMenu" class="col is-1-fullhd is-2-desktop is-hidden-touch section">
+                <div class="menu sticky">
+                    <p class="menu-label is-hidden-touch">Main</p>
+                    <ul class="menu-list">
+                        <li>
+                            <a href="https://wiki.magnilinux.org">Main Page</a>
+                        </li>
+                        <li>
+                            <a href="https://wiki.magnilinux.org/table-of-contents/">Table of Contents</a>
+                        </li>
+                        <li>
+                            <a href="https://wiki.magnilinux.org/getting-involved/">Getting Involved</a>
+                        </li>
+                        <li>
+                            <a href="https://wiki.magnilinux.org/news">Wiki News</a>
+                        </li>
+                        <li>
+                            <a href="https://wiki.magnilinux.org/search/rando">Random Page</a>
+                        </li>
+                    </ul>
+                    <p class="menu-label is-hidden-touch">Interaction</p>
+                    <ul class="menu-list">
+                        <li>
+                            <a href="https://wiki.magnilinux.orgcategory/help/">Help</a>
+                        </li>
+                        <li>
+                            <a href="https://wiki.magnilinux.orgInteraction/contributing">Contributing</a>
+                        </li>
+                        <li>
+                            <a href="https://wiki.magnilinux.orgInteraction/requests">Requests</a>
+                        </li>
+                    </ul>
+                    <p class="menu-label is-hidden-touch">Tools</p>
+                    <ul class="menu-list">
+                        <li>
+                            <a onclick="window.print();">Printable Version</a>
+                        </li>
+                    </ul>
+                </div>
+            </aside>
+            <div class="container col is-9-fullhd is-8-desktop is-11-touch">
+                <div id="mainContent">
+                <div class="field has-addons">
+                    <div class="control">
+                        <input id="sbr" class="input" type="text" placeholder="Search" onkeydown="if (event.keyCode == 13) document.getElementById('sbtn').click()">
+                    </div>
+                    <div class="control">
+                        <a class="btn" type="submit" id="sbtn">Search</a>
+                    </div>
+                </div>

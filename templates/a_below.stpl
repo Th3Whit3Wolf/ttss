@@ -1,0 +1,15 @@
+</div>
+        </section>
+        <footer class="footer">
+        <div class="col is-narrow is-hidden-mobile"></div>
+        <div class="col cnt text-c is-c section">
+            <p>
+                Content is available under <a
+                            href="http://www.gnu.org/copyleft/fdl.html">GNU Free Documentation License 1.3 or later</a> unless otherwise noted.
+                    </p>
+        </div>
+        <div class="container col is-2"></div>
+    </footer>
+        <script type="text/javascript" src="https://wiki.magnilinux.org/js/main.min.js"></script>
+    </body>
+</html>

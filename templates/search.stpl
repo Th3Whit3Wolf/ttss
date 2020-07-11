@@ -1,0 +1,27 @@
+<% include!("./a_above.stpl"); %>
+<% if pages.is_empty() { %>
+<div class="section">
+    <div class="cnt">
+        <p class="title is-4">No Results Found for:</p>
+        <p><%= query %></p>
+    </div>
+</div>
+<% } %>
+<% for page in pages.iter() { %>
+    <article class="md">
+        <div class="md-cnt">
+            <div class="cnt">
+                <p class="title is-4">
+                    <a href="{{ page.link }}"><%= page.title.as_ref().unwrap() %></a>
+                </p>
+                <% if page.date.is_some() { %>
+                <p class="subtitle is-size-6 text-grey-light">
+                    Published on <%= page.date.as_ref().unwrap() %>
+                    </p>
+                <% } %>
+                <p><%= page.desc.as_ref().unwrap() %></p>
+            </div>
+        </div>
+    </article>
+<% } %>
+<% include!("./a_below.stpl"); %>
