@@ -1,4 +1,4 @@
-# Tantivy Tera Search Server
+# Tantivy Terrible Search Server
 
 This is a search server powered by [tantivy](https://github.com/tantivy-search/tantivy) and [actix web](https://actix.rs/)
 
@@ -9,23 +9,42 @@ It makes a huge difference(I measured a 5-7X increase in throughput here).
 
 ### Usage
 
-`ttss 127.0.0.1 10011 templates ~/zola/tantivy-index ~/zola/public/sitemap.xml`
+make a `.env` file in directory like this
+
+```sh
+ADDR="127.0.0.1"                  # Address for server
+PORT="8080"                       # Port for server
+TANTIVY_INDEX="/path/to/index"    # Aboslute path to tantivy-index
+SITEMAP="/path/to/sitemap.xml"    # Aboslute path to sitemap
+```
+
+`ttss`
+
+Optionally you may create a `sailfish.yml` in the same directory as the `Cargo.toml` if you wish to store your templates somewhere else. Just make a `sailfish.yml`
+
+```yml
+template_dir: "/path/to/templates"
+```
 
 ### Performance
 
-Testing was done with wrk with 10 threads 10k connections for 1 minute.
-I tested the following
+Testing was done with wrk2 with 10 threads 10k connections (with various rates) for 1 minute on a Ryzen 3600X.
+I tested the following:
 
-* **Test 1** - Index (no search gets performed)
-* **Test 2** - Query with three results
-* **Test 3** - Query with no results found
-* **Test 4** - Redirect to random page from `sitemap.xml`
+* **Test 1** - Index (no search gets performed) - Rate @ 100k
+* **Test 2** - Query with three results - Rate @ 3k
+* **Test 3** - Query with no results found - Rate @ 3100
+* **Test 4** - Redirect to random page from `sitemap.xml` - Rate @ 100k
 
-With a total of 22 indexed html files
+With a total of 10 indexed html files
 
-| Test | Thread Latency          | Thread Requests/s   | Lat 50%  | Lat 75%  | Lat 90%  | Lat 99%  | Total Requests/sec |
-| :--- | :---------------------: | :-----------------: | :------: | :------: | :------: | :------: | :----------------: | 
-|   1  | 4.85 ms (+/- 8.06ms)    | 20.19k (+/- 10.05k) | 2.32ms   | 3.39ms   | 16.68ms  | 40.87ms  | 200,840.26         |
-|   2  | 347.07ms (+/- 17.31ms)  | 317.98 (+/- 180.40) | 347.83ms | 353.25ms | 355.09ms | 368.66ms | 2,899.75           |
-|   3  |  330.83ms (+/- 15.41ms) | 316.17 (+/- 205.29) | 330.92ms | 334.05ms | 338.35ms | 344.95ms | 3,040.79            |
-| 4    | 454.06 ms (+/- 35.41ms)    | 223.72 (+/- 120.35) | 451.95ms   | 466.66ms   | 487.82ms  | 536.80ms  | 2,212.33         |
+| Tests              | 1 Index   | 2 Qry(3) | 3 Qry(0) | 4 Random  |
+| ------------------ | --------- | -------- | -------- | --------- |
+| Thread Latency     | 2.58ms    | 183.59ms | 181.47ms | 2.37ms    |
+| Thread Requests/s  | 10.64k    | 300.42   | 307.87   | 10.65k    |
+| Lat 50%            | 1.89ms    | 115.20ms | 129.73ms | 1.83ms    |
+| Lat 75%            | 3.09ms    | 406.27ms | 390ms    | 2.89ms    |
+| Lat 90%            | 5.43ms    | 449.79ms | 427.01ms | 4.81ms    |
+| Lat 99%            | 10.98ms   | 477.18ms | 451.84ms | 9.01ms    |
+| Lat 99.999%        | 23.78ms   | 499.45ms | 467.20ms | 18.37ms   |
+| Total Requests/sec | 95,964.95 | 2944.15  | 3042     | 95,692.84 |
